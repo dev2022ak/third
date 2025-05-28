@@ -1,103 +1,137 @@
-import Image from "next/image";
+// File: app/page.tsx (Form Page)
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+export default function FormPage() {
+  const router = useRouter();
+
+  const [form, setForm] = useState({
+    fullName: '',
+    email: '',
+    age: '',
+    gender: '',
+    comments: '',
+  });
+
+  const [errors, setErrors] = useState({
+    fullName: '',
+    email: '',
+    age: '',
+    gender: '',
+  });
+
+  const validate = () => {
+    const newErrors: any = {};
+
+    if (!form.fullName.trim()) newErrors.fullName = 'Full Name is required';
+    if (!form.email.trim()) newErrors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = 'Invalid email format';
+
+    const ageNum = parseInt(form.age);
+    if (!form.age || isNaN(ageNum)) newErrors.age = 'Age is required';
+    else if (ageNum < 10 || ageNum > 100) newErrors.age = 'Age must be between 10 and 100';
+
+    if (!form.gender) newErrors.gender = 'Please select a gender';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validate()) {
+      const params = new URLSearchParams(form);
+      toast.success('Form submitted successfully!');
+      setTimeout(() => router.push(`/success?${params.toString()}`), 1000);
+    } else {
+      toast.error('Please fix the errors before submitting');
+    }
+  };
+
+  const handleReset = () => {
+    setForm({ fullName: '', email: '', age: '', gender: '', comments: '' });
+    setErrors({ fullName: '', email: '', age: '', gender: '' });
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="p-4 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Form Page</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label>Full Name</label>
+          <input
+            name="fullName"
+            value={form.fullName}
+            onChange={handleChange}
+            className="w-full border p-2"
+          />
+          {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full border p-2"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+        </div>
+
+        <div>
+          <label>Age</label>
+          <input
+            type="number"
+            name="age"
+            value={form.age}
+            onChange={handleChange}
+            className="w-full border p-2"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+          {errors.age && <p className="text-red-500 text-sm">{errors.age}</p>}
+        </div>
+
+        <div>
+          <label>Gender</label>
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            className="w-full border p-2"
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
+        </div>
+
+        <div>
+          <label>Comments</label>
+          <textarea
+            name="comments"
+            value={form.comments}
+            onChange={handleChange}
+            className="w-full border p-2"
           />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        </div>
+
+        <div className="flex gap-4">
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+          <button type="button" onClick={handleReset} className="bg-gray-500 text-white px-4 py-2 rounded">Reset</button>
+        </div>
+      </form>
+      <ToastContainer />
+    </main>
   );
 }
